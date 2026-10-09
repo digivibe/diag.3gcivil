@@ -111,9 +111,11 @@ function createCards(textures: THREE.Texture[], dossier: THREE.Object3D) {
       fragmentShader: photoFragment,
     });
     const group = new THREE.Group();
+    group.add(adoptModel(dossier, { dossier_body: paper, dossier_edge: edge }, paper));
+    // La face photo est rattachée au dossier dans le JSX (<primitive> imbriqué) : un <primitive>
+    // monté ailleurs la reparenterait et la laisserait à l'origine au lieu de suivre le dossier.
     const face = new THREE.Mesh(geometry, photo);
     face.position.z = 0.004;
-    group.add(adoptModel(dossier, { dossier_body: paper, dossier_edge: edge }, paper), face);
     return { mesh: group, face, photo, lensTarget: 0 };
   });
 }
@@ -180,10 +182,9 @@ function Deck() {
   return (
     <group position={[0, 0, 0]}>
       {cards.map((card, i) => (
-        <group key={i}>
-          <primitive object={card.mesh} />
+        <primitive key={i} object={card.mesh}>
           <primitive object={card.face} onPointerMove={onMove(i)} onPointerOut={onLeave(i)} />
-        </group>
+        </primitive>
       ))}
     </group>
   );

@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { createStructure, samplePointCloud } from "./geometry";
 import { concreteShader, edgesShader, pointsShader, rebarShader, shellShader } from "./shaders/materials";
 import { currentTheme, on, story, type Theme } from "./story";
-import { TOP, applyThemeUniforms, uniforms } from "./uniforms";
+import { TOP, advanceTime, applyThemeUniforms, uniforms } from "./uniforms";
 
 const translucent = { transparent: true, depthWrite: false, blending: THREE.AdditiveBlending } as const;
 
@@ -135,8 +135,8 @@ export function Structure() {
 export function StoryDriver() {
   const gl = useThree((state) => state.gl);
 
-  useFrame((_, delta) => {
-    uniforms.uTime.value += Math.min(delta, 1 / 20);
+  useFrame(() => {
+    advanceTime();
     uniforms.uIntro.value = story.intro;
     uniforms.uSolidY.value = THREE.MathUtils.lerp(-1, TOP + 1.8, story.solid);
     uniforms.uXrayY.value = THREE.MathUtils.lerp(TOP + 3, -1, story.xray);

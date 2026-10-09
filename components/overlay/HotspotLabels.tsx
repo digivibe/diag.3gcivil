@@ -4,8 +4,8 @@ import { HOTSPOTS } from "@/lib/content";
 export function HotspotLabels() {
   return (
     <div className="hotspots" aria-hidden="true">
-      {HOTSPOTS.map((hotspot, i) => (
-        <div key={hotspot.id} data-hotspot className={`hotspot hotspot--${i % 2 === 0 ? "up" : "down"}`}>
+      {HOTSPOTS.map((hotspot) => (
+        <div key={hotspot.id} data-hotspot className={`hotspot hotspot--${hotspot.card}`}>
           <span className="hotspot__dot" />
           <span className="hotspot__leader" />
           <span className="hotspot__card">

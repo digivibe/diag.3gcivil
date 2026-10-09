@@ -71,6 +71,19 @@ export const uniforms = {
   uBaseColor: { value: new THREE.Color() },
 };
 
+let lastTick = 0;
+
+/**
+ * Fait avancer uTime, partagé par tous les canvas (histoire, prestations, archive).
+ * Chaque canvas actif l'appelle à chaque image : le pas suit l'horloge réelle, donc deux canvas
+ * dans la même image ne l'accélèrent pas, et uTime continue d'avancer quand l'histoire est coupée.
+ */
+export function advanceTime() {
+  const now = performance.now() / 1000;
+  uniforms.uTime.value += Math.min(now - lastTick, 1 / 20);
+  lastTick = now;
+}
+
 export function applyThemeUniforms(theme: Theme) {
   const t = THEMES[theme];
   uniforms.uTheme.value = theme === "light" ? 1 : 0;

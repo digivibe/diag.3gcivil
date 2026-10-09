@@ -1177,6 +1177,8 @@ html[data-phase="content"] .hotspots {
   border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
   background: rgb(var(--scrim) / 0.82);
   clip-path: inset(0 calc((1 - var(--reveal)) * 100%) 0 0);
+  /* Recadrage vers l'intérieur quand la carte ne tient d'aucun côté du point (posé par LabelProjector). */
+  translate: var(--nudge, 0px) 0;
 }
 
 .stage-label[data-side="left"] .stage-label__card {

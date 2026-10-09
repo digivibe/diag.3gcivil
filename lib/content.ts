@@ -104,11 +104,12 @@ export const CHAPTERS: Chapter[] = [
   },
 ];
 
+/** Pathologies de la scène principale ; `card` : carte au-dessus ou au-dessous du point (évite les chevauchements). */
 export const HOTSPOTS = [
-  { id: "corrosion", label: "Corrosion des armatures", code: "BALCON · R+3", position: [-3.0, 9.45, 6.72], radius: 0.95, storey: 2 },
-  { id: "fissure", label: "Fissuration", code: "POTEAU P7 · R+2", position: [2.5, 7.9, 4.71], radius: 0.75, storey: 2 },
-  { id: "eclatement", label: "Éclatement du béton", code: "POUTRE F2 · R+2", position: [-0.6, 5.95, 4.62], radius: 0.8, storey: 1 },
-  { id: "pied", label: "Pied de poteau dégradé", code: "POTEAU P12 · RDC", position: [7.5, 0.55, 4.71], radius: 0.7, storey: 0 },
+  { id: "corrosion", label: "Corrosion des armatures", code: "BALCON · R+3", position: [-3.0, 9.45, 6.72], radius: 0.95, storey: 2, card: "up" },
+  { id: "fissure", label: "Fissuration", code: "POTEAU P7 · R+2", position: [2.5, 7.9, 4.71], radius: 0.75, storey: 2, card: "up" },
+  { id: "eclatement", label: "Éclatement du béton", code: "POUTRE F2 · R+2", position: [-0.6, 5.95, 4.62], radius: 0.8, storey: 1, card: "down" },
+  { id: "pied", label: "Pied de poteau dégradé", code: "POTEAU P12 · RDC", position: [7.5, 0.55, 4.71], radius: 0.7, storey: 0, card: "down" },
 ] as const;
 
 export const PRESTATIONS = [
