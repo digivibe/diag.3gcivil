@@ -1,0 +1,12 @@
+{
+  "$comment": "Plans caméra de la scène des prestations (repère Three.js Y-up, mètres), un par spécimen, répartis uniformément sur la timeline. Après modification : npm run assets:build",
+  "fps": 24,
+  "frames": 180,
+  "fov": 32,
+  "keys": [
+    { "name": "drone", "position": [9.9, 5.4, 14.6], "target": [0.2, 3.5, 0] },
+    { "name": "ouverture", "position": [5.0, 2.9, 14.6], "target": [0, 2.0, 0] },
+    { "name": "carottage", "position": [1.75, 1.55, 2.95], "target": [0.5, 1.02, 0.3] },
+    { "name": "poutre", "position": [4.1, 2.8, 12.4], "target": [0, 1.1, 0] }
+  ]
+}

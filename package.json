@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "camera:build": "blender --background --factory-startup --python scripts/blender/camera_path.py -- build",
-    "camera:export": "blender --background scripts/blender/camera_path.blend --python scripts/blender/camera_path.py -- export"
+    "camera:export": "blender --background scripts/blender/camera_path.blend --python scripts/blender/camera_path.py -- export",
+    "assets:build": "blender --background --factory-startup --python scripts/blender/stage_assets.py"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

@@ -118,6 +118,11 @@ export const PRESTATIONS = [
     audience: "Architectes · syndics · copropriétés",
     body: "État des lieux de la structure, analyse des fissures, vérification des porteurs et contrôle de stabilité.",
     image: "/images/prestation-inspection.webp",
+    specimen: {
+      code: "SPC-01",
+      name: "Inspection d’une pile d’ouvrage par drone",
+      steps: ["Vol d’inspection", "Relevé de la pile", "Désordres localisés"],
+    },
   },
   {
     index: "02",
@@ -125,6 +130,11 @@ export const PRESTATIONS = [
     audience: "Ouverture · extension · surélévation · RSO",
     body: "Notes de calcul et études d’exécution : percements de murs porteurs, reprises en sous-œuvre, surélévations.",
     image: "/images/prestation-etude.webp",
+    specimen: {
+      code: "SPC-02",
+      name: "Ouverture dans un mur porteur",
+      steps: ["Implantation", "Pose du linteau HEB", "Dépose de la maçonnerie", "Report des charges"],
+    },
   },
   {
     index: "03",
@@ -132,6 +142,11 @@ export const PRESTATIONS = [
     audience: "Amiable · contradictoire · litiges · malfaçons",
     body: "Un avis technique indépendant pour documenter une malfaçon, une non-conformité ou une dégradation progressive.",
     image: "/images/prestation-expertise.webp",
+    specimen: {
+      code: "SPC-03",
+      name: "Carottage et test de carbonatation",
+      steps: ["Prélèvement", "Fendage de la carotte", "Phénolphtaléine", "Front de carbonatation"],
+    },
   },
   {
     index: "04",
@@ -139,40 +154,140 @@ export const PRESTATIONS = [
     audience: "Conseil · contre-expertise",
     body: "Un accompagnement du diagnostic initial à la phase travaux, aux côtés des maîtres d’ouvrage et des syndics.",
     image: "/images/prestation-appui.webp",
+    specimen: {
+      code: "SPC-04",
+      name: "Vérification d’une poutre sous charge",
+      steps: ["Mise en charge", "Déformée", "Contraintes", "Moment fléchissant"],
+    },
   },
 ] as const;
 
 export const REALISATIONS = [
   {
+    code: "DOS-01",
     title: "Inspections détaillées et surveillance d’ouvrages d’art",
     client: "Département de Meurthe-et-Moselle · Ville de Châlons-en-Champagne · Autoroutes A8, A51, A52, A57",
+    place: "Grand Est · Provence-Alpes-Côte d’Azur",
     tags: ["Diagnostic", "Surveillance", "IQOA"],
+    missions: [
+      "Rédaction de rapports d’inspections détaillées.",
+      "Classification selon la méthode IQOA.",
+      "Établissement de programmes sur mesure de surveillance périodique ou renforcée.",
+    ],
     image: "/images/realisation-ouvrages-art.webp",
   },
   {
+    code: "DOS-02",
     title: "Diagnostics et études de réparation",
     client: "CEA — Commissariat à l’énergie atomique et aux énergies alternatives",
+    place: "Site nucléaire",
     tags: ["Diagnostic", "Réparation"],
+    missions: [
+      "Diagnostic de l’état des puits et des alvéoles d’entreposage de fûts de déchets radioactifs ou contaminés.",
+      "Proposition de mesures de renforcement provisoire en amont du démantèlement définitif.",
+      "Note de scénario pour la déconstruction des puits, intégrant les contraintes techniques et environnementales.",
+    ],
     image: "/images/realisation-cea.webp",
   },
   {
+    code: "DOS-03",
     title: "Diagnostic et justification de la tenue d’ouvrages",
     client: "CEA & Quatorze IG",
+    place: "Ouvrages souterrains",
     tags: ["Diagnostic", "Justification"],
+    missions: [
+      "Diagnostics et études de portance des galeries souterraines.",
+      "Diagnostics et justification de la tenue de la chaîne blindée.",
+    ],
     image: "/images/realisation-justification.webp",
   },
   {
+    code: "DOS-04",
     title: "Inspection par drone des appuis d’un ouvrage majeur",
-    client: "Suisse · plus de 70 appuis d’un viaduc de l’axe N01, entre Berne et Neuchâtel",
+    client: "Viaduc de l’axe national N01, entre Berne et Neuchâtel",
+    place: "Suisse",
     tags: ["Inspection", "Drone"],
+    missions: [
+      "Inspection de plus de 70 appuis d’un viaduc.",
+      "Inspection visuelle assistée par drone, en partenariat, pour évaluer l’état structurel des appuis.",
+    ],
     image: "/images/realisation-drone-viaduc.webp",
   },
   {
+    code: "DOS-05",
     title: "Assistance technique et gestion de situation de litige",
-    client: "Le Patio — Bondy (93)",
+    client: "Le Patio",
+    place: "Bondy (93)",
     tags: ["Assistance", "Litige"],
+    missions: [
+      "Inspection technique détaillée, détection de défaillances critiques et mesures conservatoires.",
+      "Assistance à la coordination de travaux conservatoires après sinistre et litige post-réception.",
+      "Pilotage des interventions d’urgence et accompagnement du syndic face aux parties prenantes.",
+    ],
     image: "/images/realisation-patio-bondy.webp",
   },
+] as const;
+
+/** Répertoire complet repris du site actuel ("Autres réalisations"). */
+export const REPERTOIRE = [
+  {
+    id: "constructions",
+    label: "Constructions & réhabilitations",
+    items: [
+      "Conception et dimensionnement du hangar AWAC de 5 000 m² — BA d’Avord (structure métallique, massifs de fondation, couverture, bardage).",
+      "Conception et dimensionnement de la surélévation en structure métallique du bâtiment DGAC — Aéroport de Nantes Saint-Brévin.",
+      "Études d’exécution pour la création d’un escalier BA et d’ouvertures (7 m sur refends + 2,50 m en façade) — Rue Bonaparte / Place du Québec, Paris 6e.",
+      "Études d’exécution pour la surélévation de 2 étages — 10 rue d’Enghien, Paris 10e (charpente, planchers mixtes, fondations).",
+      "Réhabilitation lourde — 16 rue Lalo, Paris 16e (reprises en sous-œuvre, parkings, monte-voiture, ascenseur extérieur).",
+      "Renforcement des poutres BA et études d’exécution — École Notre-Dame des Oiseaux, Paris 16e.",
+      "Conception et dimensionnement d’une couverture en gradins (5 kN/m²) — Amphithéâtre romain, Vosges.",
+      "Conception et dimensionnement de nouveaux planchers BA et remise en état de trumeaux — Manufacture de Dijonval, Sedan.",
+      "Suppression de palées de stabilité et création d’un plancher intermédiaire — Nef industrielle transformée en garage, Pantin.",
+      "Diagnostic et renforcement planchers + fondations — Inspection générale des services, rue Cambacérès, Paris 8e.",
+      "Ouvertures dans murs porteurs avec renforts (HEB, platines, ancrages).",
+      "Reprises en sous-œuvre sous façades et refends, phasages d’exécution.",
+      "Dallages industriels : vérification des charges concentrées, radiers, joints.",
+      "Escaliers BA neufs et renforcement d’escaliers existants.",
+      "Murs de soutènement (BA, gabions) et calculs de poussée des terres.",
+    ],
+  },
+  {
+    id: "infrastructures",
+    label: "Infrastructures & ouvrages d’art",
+    items: [
+      "Conception et dimensionnement d’ouvrages pyrotechniques (dépôts de munitions, hangars missiles, massifs supports) sur bases aériennes.",
+      "Contrôle technique de plans et notes de calcul — bâtiments pyrotechniques et classiques.",
+      "Bâtiment de conditionnement missile — résistance aux explosions intérieures et extérieures (Île Longue, Brest).",
+      "Bâtiment de stockage missiles — résistance aux explosions + mur de soutènement de 10 m en gabions (presqu’île de Guenvenez, Brest).",
+      "Mur anti-souffle et anti-éclats — éléments préfabriqués BA connectés.",
+      "Études de dangers — fuites de kérosène sur avions et camions ravitailleurs, détermination des zones de danger.",
+      "Vérification de la résistance d’une chaufferie à une explosion de gaz naturel.",
+      "Vérification de voûtes de métro sous charges de chantier et de grues.",
+      "Vérification de ponts en maçonnerie sous convois exceptionnels (RER lignes A et B).",
+      "Diagnostics structurels d’escaliers métalliques — stations aériennes de la ligne 6 du métro (remplacements).",
+      "Vérification de la stabilité des tabliers du viaduc de Rueil, dispositif anti-déraillement et préconisations de réparation.",
+      "Vérifications d’ouvrages BA, CM, mixtes et BP — ligne B du RER sous passage de grue ferroviaire.",
+      "Vérification du dallage de la station Galliéni sous charges concentrées.",
+      "Analyse de fissurations de parois verticales en tranchée — rue Haxo, Paris 20e (gradient thermique).",
+      "Contrôle technique de plans et notes de calcul — liaison RER / station ligne 1, Porte Maillot.",
+      "Reconnaissance et vérification d’une passerelle en arc (tirants BA) — Massy-Palaiseau, décision de fermeture au public.",
+    ],
+  },
+] as const;
+
+/** Formulaire de demande : valeurs envoyées telles quelles à l'API (champs "type" et "zone"). */
+export const MISSION_TYPES = [
+  ...PRESTATIONS.map((item) => ({ value: item.title, hint: item.audience })),
+  { value: "Autre / je ne sais pas encore", hint: "Nous qualifions votre besoin ensemble" },
+] as const;
+
+export const ZONES = [
+  "Paris",
+  "Hauts-de-Seine (92)",
+  "Seine-Saint-Denis (93)",
+  "Val-de-Marne (94)",
+  "Grande couronne",
+  "Hors Île-de-France",
 ] as const;
 
 export const FAQ = [

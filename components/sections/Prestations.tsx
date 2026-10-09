@@ -3,112 +3,179 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useRef, useSyncExternalStore } from "react";
+import { useRef } from "react";
+import { story } from "@/components/experience/story";
+import { prestationsState } from "@/components/stage/state";
 import { PRESTATIONS } from "@/lib/content";
+import { requestDevis } from "./devis-events";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const FINE_POINTER = "(hover: hover) and (pointer: fine)";
-const subscribe = (onChange: () => void) => {
-  const query = window.matchMedia(FINE_POINTER);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-};
-/** true côté serveur : les vignettes tactiles ne sont ajoutées qu'après hydratation, si besoin. */
-const useFinePointer = () => useSyncExternalStore(subscribe, () => window.matchMedia(FINE_POINTER).matches, () => true);
+const PrestationsScene = dynamic(() => import("@/components/prestations/PrestationsScene"), { ssr: false });
 
-/** Liste des prestations : l'image suit le curseur au survol (desktop), vignette en ligne au tactile. */
+/** Étiquettes projetées sur les spécimens (ancres définies dans components/prestations/*Specimen.ts). */
+const LABELS = [
+  { id: "fissure", code: "Désordre", text: "Fissure verticale" },
+  { id: "epaufrure", code: "Désordre", text: "Épaufrure en tête de pile" },
+  { id: "heb", code: "Renfort", text: "Linteau HEB sur platines" },
+  { id: "charges", code: "Descente de charges", text: "Report vers les trumeaux" },
+  { id: "front", code: "Essai", text: "Front de carbonatation" },
+  { id: "armature", code: "Pathologie", text: "Armature corrodée" },
+  { id: "fleche", code: "Déformée", text: "Flèche maximale" },
+  { id: "moment", code: "Calcul", text: "Moment fléchissant maximal" },
+];
+
+function StageOverlay() {
+  return (
+    <div className="stage-overlay" aria-hidden="true">
+      <span className="stage-overlay__corner stage-overlay__corner--tl" />
+      <span className="stage-overlay__corner stage-overlay__corner--tr" />
+      <span className="stage-overlay__corner stage-overlay__corner--bl" />
+      <span className="stage-overlay__corner stage-overlay__corner--br" />
+      {PRESTATIONS.map((item, i) => (
+        <div key={item.index} className={`specimen-hud${i === 0 ? " is-active" : ""}`} data-specimen={i}>
+          <p className="specimen-hud__code">
+            {item.specimen.code} · Spécimen {i + 1}/{PRESTATIONS.length}
+          </p>
+          <p className="specimen-hud__name">{item.specimen.name}</p>
+          <ol className="specimen-hud__steps">
+            {item.specimen.steps.map((step, k) => (
+              <li key={step} className="specimen-hud__step">
+                <span>{String(k + 1).padStart(2, "0")}</span>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
+      <div className="specimen-photos">
+        {PRESTATIONS.map((item, i) => (
+          <figure key={item.index} className={`specimen-photo${i === 0 ? " is-active" : ""}`} data-specimen={i}>
+            <Image src={item.image} alt="" fill sizes="240px" />
+            <figcaption>Sur le terrain</figcaption>
+          </figure>
+        ))}
+      </div>
+      {LABELS.map((label) => (
+        <div key={label.id} data-label={label.id} className="stage-label">
+          <span className="stage-label__dot" />
+          <span className="stage-label__leader" />
+          <span className="stage-label__card">
+            <span className="stage-label__code">{label.code}</span>
+            <span className="stage-label__text">{label.text}</span>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Prestations : section épinglée. Chaque prestation pilote un spécimen 3D dont l'animation
+ * (inspection, percement, carottage, vérification) avance avec le scroll.
+ */
 export function Prestations() {
   const root = useRef<HTMLElement>(null);
-  const finePointer = useFinePointer();
 
   useGSAP(
-    (_, contextSafe) => {
+    () => {
       const section = root.current!;
-      const preview = section.querySelector<HTMLElement>(".prestations__preview")!;
-      const images = gsap.utils.toArray<HTMLElement>(".prestations__frame", section);
-      const items = gsap.utils.toArray<HTMLElement>(".prestation", section);
+      const items = gsap.utils.toArray<HTMLElement>(".service", section);
+      const count = PRESTATIONS.length;
+      let active = -1;
 
-      gsap.from(items, {
-        y: 40,
-        autoAlpha: 0,
-        duration: 0.9,
-        ease: "power3.out",
-        stagger: 0.08,
-        scrollTrigger: { trigger: section.querySelector(".prestations__list"), start: "top 80%" },
-      });
-
-      if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches || !contextSafe) return;
-
-      const xTo = gsap.quickTo(preview, "x", { duration: 0.7, ease: "power3" });
-      const yTo = gsap.quickTo(preview, "y", { duration: 0.7, ease: "power3" });
-      const rotate = gsap.quickTo(preview, "rotation", { duration: 0.9, ease: "power3" });
-      let lastX = 0;
-
-      const move = contextSafe((event: PointerEvent) => {
-        const bounds = section.getBoundingClientRect();
-        xTo(event.clientX - bounds.left);
-        yTo(event.clientY - bounds.top);
-        rotate(gsap.utils.clamp(-8, 8, (event.clientX - lastX) * 0.4));
-        lastX = event.clientX;
-      });
-      const show = contextSafe((index: number) => {
-        images.forEach((image, i) =>
-          gsap.to(image, { autoAlpha: i === index ? 1 : 0, scale: i === index ? 1 : 1.15, duration: 0.6, ease: "power3.out" }),
-        );
-        gsap.to(preview, { autoAlpha: 1, scale: 1, duration: 0.5, ease: "power3.out" });
-      });
-      const hide = contextSafe(() => gsap.to(preview, { autoAlpha: 0, scale: 0.8, duration: 0.4, ease: "power3.in" }));
-
-      const list = section.querySelector<HTMLElement>(".prestations__list")!;
-      const listeners = items.map((item, i) => {
-        const enter = () => show(i);
-        item.addEventListener("pointerenter", enter);
-        return () => item.removeEventListener("pointerenter", enter);
-      });
-      section.addEventListener("pointermove", move);
-      list.addEventListener("pointerleave", hide);
-      return () => {
-        listeners.forEach((off) => off());
-        section.removeEventListener("pointermove", move);
-        list.removeEventListener("pointerleave", hide);
+      // Le HUD du canvas est monté de façon différée : il est relu à chaque changement de prestation.
+      const apply = (progress: number) => {
+        const t = progress * count;
+        prestationsState.t = t;
+        const index = Math.min(count - 1, Math.floor(t));
+        const local = Math.min(Math.max(t - index, 0), 1);
+        if (index !== active) {
+          active = index;
+          items.forEach((item, i) => item.classList.toggle("is-active", i === index));
+          section.querySelectorAll<HTMLElement>("[data-specimen]").forEach((el) => {
+            el.classList.toggle("is-active", Number(el.dataset.specimen) === index);
+          });
+        }
+        items[index].style.setProperty("--progress", local.toFixed(3));
+        const steps = section.querySelectorAll<HTMLElement>(`.specimen-hud[data-specimen="${index}"] .specimen-hud__step`);
+        const current = Math.min(steps.length - 1, Math.floor(local * steps.length));
+        steps.forEach((step, i) => {
+          step.classList.toggle("is-done", i < current);
+          step.classList.toggle("is-current", i === current);
+        });
       };
+
+      // Épinglage CSS (position: sticky) : aucun pin-spacer, le DOM géré par React reste intact.
+      const trigger = ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        end: "bottom bottom",
+        onUpdate: (self) => apply(self.progress),
+        onRefresh: (self) => apply(self.progress),
+      });
+      apply(trigger.progress);
+
+      // Un clic sur une prestation amène le scroll au début de son segment.
+      const cleanups = items.map((item, i) => {
+        const button = item.querySelector<HTMLButtonElement>(".service__toggle");
+        const go = () => {
+          const y = trigger.start + ((i + 0.2) / count) * (trigger.end - trigger.start);
+          if (story.lenis) story.lenis.scrollTo(y, { duration: 1.4 });
+          else window.scrollTo({ top: y, behavior: story.reducedMotion ? "auto" : "smooth" });
+        };
+        button?.addEventListener("click", go);
+        return () => button?.removeEventListener("click", go);
+      });
+      return () => cleanups.forEach((cleanup) => cleanup());
     },
     { scope: root },
   );
 
   return (
-    <section id="prestations" ref={root} className="section prestations" aria-labelledby="prestations-title">
-      <header className="section__head">
-        <p className="eyebrow">Notre expertise au service de vos besoins</p>
-        <h2 id="prestations-title" className="section__title">
-          Nos prestations
-        </h2>
-      </header>
-      <ol className="prestations__list">
-        {PRESTATIONS.map((item) => (
-          <li key={item.index} className="prestation">
-            <span className="prestation__index">{item.index}</span>
-            <div className="prestation__main">
-              <h3 className="prestation__title">{item.title}</h3>
-              <p className="prestation__audience">{item.audience}</p>
-            </div>
-            <p className="prestation__body">{item.body}</p>
-            {!finePointer && (
-              <div className="prestation__thumb">
-                <Image src={item.image} alt="" fill sizes="100vw" />
-              </div>
-            )}
-          </li>
-        ))}
-      </ol>
-      <div className="prestations__preview" aria-hidden="true">
-        {PRESTATIONS.map((item) => (
-          <div key={item.index} className="prestations__frame">
-            <Image src={item.image} alt="" fill sizes="420px" />
-          </div>
-        ))}
+    <section
+      id="prestations"
+      ref={root}
+      className="services"
+      style={{ height: `${(PRESTATIONS.length + 1) * 100}svh` }}
+      aria-labelledby="prestations-title"
+    >
+      <div className="services__pin">
+        <div className="services__panel">
+          <header className="services__head">
+            <p className="eyebrow">Notre expertise au service de vos besoins</p>
+            <h2 id="prestations-title" className="section__title services__title">
+              Nos prestations
+            </h2>
+          </header>
+          <ol className="services__list">
+            {PRESTATIONS.map((item, i) => (
+              <li key={item.index} className={`service${i === 0 ? " is-active" : ""}`}>
+                <h3 className="service__heading">
+                  <button type="button" className="service__toggle">
+                    <span className="service__index">{item.index}</span>
+                    <span className="service__title">{item.title}</span>
+                  </button>
+                </h3>
+                <div className="service__detail">
+                  <div className="service__inner">
+                    <p className="service__audience">{item.audience}</p>
+                    <p className="service__body">{item.body}</p>
+                    <button type="button" className="service__cta" onClick={() => requestDevis(item.title)}>
+                      Demander ce diagnostic <span aria-hidden="true">→</span>
+                    </button>
+                  </div>
+                </div>
+                <span className="service__progress" aria-hidden="true" />
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div className="services__stage">
+          <PrestationsScene className="stage-canvas" overlay={<StageOverlay />} />
+        </div>
       </div>
     </section>
   );
