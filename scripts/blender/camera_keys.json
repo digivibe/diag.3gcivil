@@ -1,0 +1,14 @@
+{
+  "$comment": "Plans caméra par chapitre (repère Three.js Y-up, mètres). Les clés sont réparties uniformément sur la timeline : chapitre i <=> temps i / (n - 1). Après modification : npm run camera:build",
+  "fps": 24,
+  "frames": 240,
+  "fov": 35,
+  "keys": [
+    { "name": "hero", "position": [-33, 5.9, 37.9], "target": [0, 10.8, 0] },
+    { "name": "inspection", "position": [34.7, 17.9, 34.7], "target": [0, 8.4, 0] },
+    { "name": "analyse", "position": [37.9, 9.7, 33.9], "target": [0.5, 10.2, 0] },
+    { "name": "pathologies", "position": [-4.9, 12.3, 27.5], "target": [-0.4, 7.8, 5.4] },
+    { "name": "modelisation", "position": [-48.8, 35.7, 48.8], "target": [0, 15, 0] },
+    { "name": "rapport", "position": [16.7, 3.9, 45], "target": [0, 11, 0] }
+  ]
+}

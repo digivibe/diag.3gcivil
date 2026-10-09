@@ -1,0 +1,15 @@
+{
+  "$comment": "Source unique des dimensions du bâtiment (mètres, repère Three.js Y-up). Lu par le site (Building.tsx) et par Blender (scripts/blender/camera_path.py).",
+  "storeys": 6,
+  "storeyHeight": 3.2,
+  "slabThickness": 0.26,
+  "columnsX": [-7.5, -2.5, 2.5, 7.5],
+  "columnsZ": [-4.5, 0, 4.5],
+  "columnSize": 0.42,
+  "beamWidth": 0.3,
+  "beamDepth": 0.52,
+  "slabOverhang": 0.55,
+  "raft": { "margin": 1.6, "thickness": 0.6 },
+  "balcony": { "depth": 1.7, "fromX": -6.8, "toX": 6.8, "parapetHeight": 1.05, "parapetThickness": 0.12 },
+  "core": { "x": 0, "z": -2.25, "width": 3.4, "depth": 2.9, "wall": 0.2, "door": 1.1 }
+}
