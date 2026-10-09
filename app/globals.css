@@ -1518,6 +1518,39 @@ html[data-phase="content"] .hotspots {
   color: var(--muted);
 }
 
+/* Aperçu de quelques missions, le reste se déplie (même icône +/− que la FAQ). */
+.repertoire__more {
+  gap: 0.9rem;
+  margin-top: 2rem;
+}
+
+.repertoire__more-icon {
+  position: relative;
+  flex: none;
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.repertoire__more-icon::before,
+.repertoire__more-icon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: currentColor;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.repertoire__more-icon::after {
+  transform: rotate(90deg);
+}
+
+.repertoire__more[aria-expanded="true"] .repertoire__more-icon::after {
+  transform: rotate(0deg);
+}
+
 /* FAQ */
 
 .faq__list {
@@ -1849,14 +1882,45 @@ html[data-phase="content"] .hotspots {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* Filtres sur une ligne qui défile horizontalement, au lieu de trois lignes empilées. */
+  .repertoire__filters {
+    flex-wrap: nowrap;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .repertoire__filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .repertoire__filter {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  /* Numéro et catégorie sur une ligne, texte sur toute la largeur en dessous. */
   .repertoire__item {
-    grid-template-columns: 2.5rem minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.45rem 0.9rem;
+    padding: 1rem 0;
+  }
+
+  .repertoire__text {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 
   .repertoire__category {
     grid-column: 2;
+    grid-row: 1;
     justify-self: start;
     text-align: left;
+  }
+
+  .repertoire__more {
+    width: 100%;
   }
 
   .services__pin {

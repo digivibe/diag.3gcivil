@@ -15,6 +15,17 @@ const ArchiveScene = dynamic(() => import("@/components/archive/ArchiveScene"), 
 
 const TOTAL = REPERTOIRE.reduce((sum, group) => sum + group.items.length, 0);
 const ENTRIES = REPERTOIRE.flatMap((group) => group.items.map((text) => ({ text, category: group.id, label: group.label })));
+/** Missions affichées avant "Voir les autres" (par filtre). */
+const PREVIEW = 6;
+
+/** Mesures prises juste avant un changement du répertoire, pour animer ou ancrer le résultat. */
+type Snapshot = { height: number; buttonTop: number | null; reveal: "filter" | "expand" | "collapse" };
+
+/** Défilement instantané, synchronisé avec Lenis s'il est actif. */
+function jumpTo(y: number) {
+  if (story.lenis) story.lenis.scrollTo(y, { immediate: true, force: true });
+  else window.scrollTo(0, y);
+}
 
 /**
  * Réalisations : archive 3D de dossiers feuilletés au scroll (section épinglée),
@@ -22,7 +33,32 @@ const ENTRIES = REPERTOIRE.flatMap((group) => group.items.map((text) => ({ text,
  */
 export function Realisations() {
   const root = useRef<HTMLElement>(null);
+  const list = useRef<HTMLOListElement>(null);
+  const more = useRef<HTMLButtonElement>(null);
+  const snapshot = useRef<Snapshot | null>(null);
   const [filter, setFilter] = useState<string>("all");
+  const [expanded, setExpanded] = useState(false);
+
+  const matching = ENTRIES.filter((entry) => filter === "all" || entry.category === filter);
+  const shown = new Set((expanded ? matching : matching.slice(0, PREVIEW)).map((entry) => entry.text));
+  const remaining = matching.length - PREVIEW;
+
+  const capture = (reveal: Snapshot["reveal"]) => {
+    snapshot.current = {
+      height: list.current?.offsetHeight ?? 0,
+      buttonTop: more.current?.getBoundingClientRect().top ?? null,
+      reveal,
+    };
+  };
+  const chooseFilter = (id: string) => {
+    if (id === filter) return;
+    capture("filter");
+    setFilter(id);
+  };
+  const toggleExpanded = () => {
+    capture(expanded ? "collapse" : "expand");
+    setExpanded(!expanded);
+  };
 
   useGSAP(
     () => {
@@ -86,14 +122,36 @@ export function Realisations() {
     { scope: root },
   );
 
-  // Changement de filtre : les entrées visibles réapparaissent en cascade.
+  // Après un changement de filtre ou un dépliage (rendu, avant affichage) : la hauteur de la liste part
+  // de l'ancienne et les entrées qui apparaissent arrivent en cascade. Au repli, le bouton reste sous le pointeur.
   useGSAP(
     () => {
+      const before = snapshot.current;
+      const el = list.current;
+      snapshot.current = null;
+      if (!before || !el) return;
+      gsap.killTweensOf(el);
+      gsap.set(el, { clearProps: "height,overflow" });
+      const items = gsap.utils.toArray<HTMLElement>(".repertoire__item:not([hidden])", el);
+
+      if (before.reveal === "collapse") {
+        // La liste raccourcit au-dessus du bouton : le défilement est compensé pour qu'il ne saute pas.
+        const top = more.current?.getBoundingClientRect().top;
+        if (before.buttonTop !== null && top !== undefined) jumpTo(window.scrollY + top - before.buttonTop);
+        if (!story.reducedMotion) gsap.fromTo(items, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.45, ease: "power2.out", overwrite: true });
+        return;
+      }
       if (story.reducedMotion) return;
-      const items = gsap.utils.toArray<HTMLElement>(".repertoire__item:not([hidden])", root.current);
-      gsap.fromTo(items, { y: 14, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.5, ease: "power3.out", stagger: 0.025, overwrite: true });
+
+      const entering = before.reveal === "expand" ? items.slice(PREVIEW) : items;
+      gsap.fromTo(
+        el,
+        { height: before.height, overflow: "hidden" },
+        { height: el.offsetHeight, duration: 0.7, ease: "power3.inOut", clearProps: "height,overflow" },
+      );
+      gsap.fromTo(entering, { y: 14, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.5, ease: "power3.out", stagger: 0.03, overwrite: true });
     },
-    { scope: root, dependencies: [filter] },
+    { scope: root, dependencies: [filter, expanded] },
   );
 
   return (
@@ -168,22 +226,35 @@ export function Realisations() {
                 type="button"
                 className="repertoire__filter"
                 aria-pressed={filter === option.id}
-                onClick={() => setFilter(option.id)}
+                onClick={() => chooseFilter(option.id)}
               >
                 {option.label} <span>{option.count}</span>
               </button>
             ),
           )}
         </div>
-        <ol className="repertoire__list">
+        <ol ref={list} id="repertoire-list" className="repertoire__list">
           {ENTRIES.map((entry, i) => (
-            <li key={entry.text} className="repertoire__item" hidden={filter !== "all" && filter !== entry.category}>
+            <li key={entry.text} className="repertoire__item" hidden={!shown.has(entry.text)}>
               <span className="repertoire__index">{String(i + 1).padStart(2, "0")}</span>
               <p className="repertoire__text">{entry.text}</p>
               <span className="repertoire__category">{entry.label}</span>
             </li>
           ))}
         </ol>
+        {remaining > 0 && (
+          <button
+            ref={more}
+            type="button"
+            className="button button--ghost repertoire__more"
+            aria-expanded={expanded}
+            aria-controls="repertoire-list"
+            onClick={toggleExpanded}
+          >
+            {expanded ? "Réduire la liste" : `Voir les ${remaining} autres missions`}
+            <span className="repertoire__more-icon" aria-hidden="true" />
+          </button>
+        )}
       </div>
     </section>
   );
