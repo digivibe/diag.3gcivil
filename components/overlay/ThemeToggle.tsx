@@ -25,6 +25,7 @@ export function ThemeToggle() {
     <button
       type="button"
       className="theme-toggle"
+      data-sound="switch"
       onClick={toggle}
       aria-pressed={theme === "light"}
       aria-label={theme === "dark" ? "Passer au thème clair" : "Passer au thème sombre"}

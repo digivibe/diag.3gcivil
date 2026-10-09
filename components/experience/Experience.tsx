@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { HotspotLabels } from "@/components/overlay/HotspotLabels";
 import { Hud } from "@/components/overlay/Hud";
 import { Loader } from "@/components/overlay/Loader";
+import { SoundDirector } from "@/components/sound/SoundDirector";
 import { ScrollDirector } from "./ScrollDirector";
 
 // La scène WebGL n'existe que côté client : le HTML rendu par le serveur reste lisible (SEO, sans JS).
@@ -17,6 +18,7 @@ export function Experience() {
       </div>
       <HotspotLabels />
       <ScrollDirector />
+      <SoundDirector />
       <Hud />
       <Loader />
     </>

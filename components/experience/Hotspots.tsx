@@ -3,6 +3,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { playSound } from "@/components/sound/engine";
 import { HOTSPOTS } from "@/lib/content";
 import { story } from "./story";
 import { EXPLODE_GAP } from "./uniforms";
@@ -17,6 +18,8 @@ const SAFE_MARGIN = 24;
 export function HotspotProjector() {
   const labels = useRef<HTMLElement[]>([]);
   const cardWidths = useRef<number[]>([]);
+  /** Étiquettes déjà révélées : chaque apparition déclenche une alerte sonore, une seule fois. */
+  const revealed = useRef<boolean[]>([]);
   const point = useRef(new THREE.Vector3());
 
   useEffect(() => {
@@ -39,6 +42,7 @@ export function HotspotProjector() {
       const visible = THREE.MathUtils.clamp(story.labels * (HOTSPOTS.length + 1) - i, 0, 1);
       if (visible <= 0) {
         label.style.opacity = "0";
+        revealed.current[i] = false;
         return;
       }
       const lift = story.explode * (hotspot.storey + 1) * EXPLODE_GAP;
@@ -49,6 +53,10 @@ export function HotspotProjector() {
       const inside = p.z < 1 && x > SAFE_MARGIN && x < width - SAFE_MARGIN && y > height * 0.12 && y < height * 0.88;
       label.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
       label.style.opacity = inside ? visible.toFixed(3) : "0";
+      if (visible > 0.5 && !revealed.current[i]) {
+        revealed.current[i] = true;
+        if (inside) playSound("ping", { index: i, pan: ((x / width) * 2 - 1) * 0.6 });
+      }
       label.style.setProperty("--reveal", visible.toFixed(3));
       // L'étiquette passe à gauche du point seulement si elle déborderait à droite.
       label.dataset.side = x + CARD_OFFSET + (cardWidths.current[i] ?? 0) > width - SAFE_MARGIN ? "left" : "right";

@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRef } from "react";
 import { story } from "@/components/experience/story";
+import { playSound } from "@/components/sound/engine";
 import { prestationsState } from "@/components/stage/state";
 import { PRESTATIONS } from "@/lib/content";
 import { requestDevis } from "./devis-events";
@@ -85,6 +86,9 @@ export function Prestations() {
       const items = gsap.utils.toArray<HTMLElement>(".service", section);
       const count = PRESTATIONS.length;
       let active = -1;
+      let lastStep = -1;
+      // Les spécimens sont à droite du texte sur grand écran : leurs sons aussi.
+      const pan = () => (window.innerWidth > 900 ? 0.4 : 0);
 
       // Le HUD du canvas est monté de façon différée : il est relu à chaque changement de prestation.
       const apply = (progress: number) => {
@@ -92,7 +96,9 @@ export function Prestations() {
         prestationsState.t = t;
         const index = Math.min(count - 1, Math.floor(t));
         const local = Math.min(Math.max(t - index, 0), 1);
-        if (index !== active) {
+        const changed = index !== active;
+        if (changed) {
+          if (active !== -1) playSound("specimen", { index, pan: pan() });
           active = index;
           items.forEach((item, i) => item.classList.toggle("is-active", i === index));
           section.querySelectorAll<HTMLElement>("[data-specimen]").forEach((el) => {
@@ -102,6 +108,9 @@ export function Prestations() {
         items[index].style.setProperty("--progress", local.toFixed(3));
         const steps = section.querySelectorAll<HTMLElement>(`.specimen-hud[data-specimen="${index}"] .specimen-hud__step`);
         const current = Math.min(steps.length - 1, Math.floor(local * steps.length));
+        // Nouvelle étape du même spécimen : bip d'instrument (le changement de spécimen a déjà son son).
+        if (current !== lastStep && lastStep !== -1 && !changed) playSound("step", { index: current, pan: pan() });
+        lastStep = current;
         steps.forEach((step, i) => {
           step.classList.toggle("is-done", i < current);
           step.classList.toggle("is-current", i === current);

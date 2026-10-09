@@ -231,6 +231,79 @@ html[data-phase="content"] .webgl {
   fill: currentColor;
 }
 
+/* Bouton son : barres animées (actif), figées (en attente du premier geste), trait plat (coupé). */
+.sound-toggle {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.sound-toggle:hover {
+  border-color: var(--scan);
+  color: var(--scan);
+}
+
+/* Les deux boutons ronds forment un groupe, plus serré que l'espacement de l'en-tête. */
+.sound-toggle + .theme-toggle {
+  margin-left: -1.25rem;
+}
+
+.sound-toggle__bars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 0.9rem;
+}
+
+.sound-toggle__bars span {
+  width: 2px;
+  height: 100%;
+  border-radius: 1px;
+  background: currentColor;
+  transform: scaleY(var(--level, 0.5));
+  transition: transform 0.4s var(--ease-out);
+}
+
+.sound-toggle__bars span:nth-child(1) {
+  --level: 0.45;
+  --speed: 0.9s;
+}
+
+.sound-toggle__bars span:nth-child(2) {
+  --level: 0.85;
+  --speed: 0.7s;
+}
+
+.sound-toggle__bars span:nth-child(3) {
+  --level: 0.6;
+  --speed: 1.05s;
+}
+
+.sound-toggle__bars span:nth-child(4) {
+  --level: 0.75;
+  --speed: 0.8s;
+}
+
+.sound-toggle[data-state="on"] .sound-toggle__bars span {
+  animation: sound-bar var(--speed) ease-in-out infinite alternate;
+}
+
+.sound-toggle[data-state="armed"] .sound-toggle__bars {
+  opacity: 0.6;
+}
+
+.sound-toggle[data-state="off"] .sound-toggle__bars span {
+  transform: scaleY(0.15);
+}
+
 /* ───────────────────────── En-tête ───────────────────────── */
 
 .site-header {
@@ -1773,6 +1846,15 @@ html[data-phase="content"] .hotspots {
   }
 }
 
+@keyframes sound-bar {
+  from {
+    transform: scaleY(0.2);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
 @keyframes scan-line {
   0% {
     transform: translateX(-100%);
@@ -1983,6 +2065,10 @@ html[data-phase="content"] .hotspots {
 @media (max-width: 600px) {
   .site-header {
     gap: 0.75rem;
+  }
+
+  .sound-toggle + .theme-toggle {
+    margin-left: -0.25rem;
   }
 
   .label-long {

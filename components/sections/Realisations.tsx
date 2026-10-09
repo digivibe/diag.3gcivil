@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 import { story } from "@/components/experience/story";
+import { playSound } from "@/components/sound/engine";
 import { archiveState } from "@/components/stage/state";
 import { REALISATIONS, REPERTOIRE } from "@/lib/content";
 
@@ -56,6 +57,7 @@ export function Realisations() {
     setFilter(id);
   };
   const toggleExpanded = () => {
+    playSound(expanded ? "collapse" : "expand");
     capture(expanded ? "collapse" : "expand");
     setExpanded(!expanded);
   };
@@ -74,6 +76,7 @@ export function Realisations() {
         archiveState.velocity = gsap.utils.clamp(-1, 1, velocity / 4000);
         const index = Math.round(archiveState.t);
         if (index === active) return;
+        if (active !== -1) playSound("flip", { velocity: archiveState.velocity, pan: window.innerWidth > 900 ? 0.35 : 0 });
         active = index;
         dossiers.forEach((dossier, i) => dossier.classList.toggle("is-active", i === index));
         links.forEach((link, i) => link.setAttribute("aria-current", i === index ? "true" : "false"));
@@ -247,6 +250,7 @@ export function Realisations() {
             ref={more}
             type="button"
             className="button button--ghost repertoire__more"
+            data-sound="none"
             aria-expanded={expanded}
             aria-controls="repertoire-list"
             onClick={toggleExpanded}

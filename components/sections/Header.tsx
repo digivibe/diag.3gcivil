@@ -1,4 +1,5 @@
 import { LogoMark } from "@/components/brand/Logo";
+import { SoundToggle } from "@/components/overlay/SoundToggle";
 import { ThemeToggle } from "@/components/overlay/ThemeToggle";
 import { BRAND } from "@/lib/content";
 
@@ -15,6 +16,7 @@ export function Header() {
         <a href="#realisations">Réalisations</a>
         <a href="#faq">FAQ</a>
       </nav>
+      <SoundToggle />
       <ThemeToggle />
       <a className="button button--small" href="#contact">
         <span className="label-long">Demander un diagnostic</span>

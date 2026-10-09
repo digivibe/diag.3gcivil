@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { common, output } from "@/components/experience/shaders/chunks";
 import { uniforms as shared } from "@/components/experience/uniforms";
 import { adoptModel } from "@/components/prestations/parts";
+import { playSound } from "@/components/sound/engine";
 import { createSpecimenMaterial } from "@/components/stage/shaders";
 import { StageCanvas, useStagePointer } from "@/components/stage/StageCanvas";
 import { StageGround } from "@/components/stage/StageGround";
@@ -175,6 +176,8 @@ function Deck() {
   const onMove = (index: number) => (event: ThreeEvent<PointerEvent>) => {
     if (!event.uv) return;
     cards[index].photo.uniforms.uPointer.value.copy(event.uv);
+    // La loupe ne s'ouvre que sur le dossier consulté : petit glissando à son ouverture.
+    if (cards[index].lensTarget === 0 && index === Math.round(archiveState.t)) playSound("lens", { pan: event.pointer.x * 0.6 });
     setLensTarget(cards[index], 1);
   };
   const onLeave = (index: number) => () => setLensTarget(cards[index], 0);
