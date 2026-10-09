@@ -18,7 +18,7 @@ export function Header() {
       </nav>
       <SoundToggle />
       <ThemeToggle />
-      <a className="button button--small" href="#contact">
+      <a className="button button--small" href="#contact" data-devis="">
         <span className="label-long">Demander un diagnostic</span>
         <span className="label-short">Diagnostic</span>
       </a>

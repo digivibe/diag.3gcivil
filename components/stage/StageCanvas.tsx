@@ -33,6 +33,8 @@ type Props = {
   camera: { position: [number, number, number]; fov: number };
   /** Calque DOM superposé (étiquettes [data-label], HUD…). */
   overlay?: ReactNode;
+  /** Scène du formulaire de demande : elle continue de tourner quand les autres se mettent en pause. */
+  modal?: boolean;
   children: ReactNode;
 };
 
@@ -40,13 +42,16 @@ type Props = {
  * Canvas d'une section : monté à l'approche de l'écran, boucle de rendu coupée hors écran,
  * thème synchronisé, pointeur relatif à la zone. Un seul contexte WebGL travaille à la fois.
  */
-export function StageCanvas({ className, camera, overlay, children }: Props) {
+export function StageCanvas({ className, camera, overlay, modal = false, children }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const [pointer] = useState(createPointer);
   const [labels] = useState<StageLabels>(() => new Map());
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [theme, setTheme] = useState<Theme>(currentTheme);
+
+  useEffect(() => (modal ? undefined : on("devis", setPaused)), [modal]);
 
   useEffect(
     () =>
@@ -79,7 +84,7 @@ export function StageCanvas({ className, camera, overlay, children }: Props) {
     <div ref={host} className={className} data-stage>
       {mounted && (
         <Canvas
-          frameloop={active ? "always" : "never"}
+          frameloop={active && !paused ? "always" : "never"}
           dpr={[0.75, 1.5]}
           camera={{ near: 0.05, far: 200, ...camera }}
           gl={{ antialias: false, powerPreference: "high-performance", stencil: false }}

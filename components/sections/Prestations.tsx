@@ -172,7 +172,7 @@ export function Prestations() {
                   <div className="service__inner">
                     <p className="service__audience">{item.audience}</p>
                     <p className="service__body">{item.body}</p>
-                    <button type="button" className="service__cta" onClick={() => requestDevis(item.title)}>
+                    <button type="button" className="service__cta" onClick={(event) => requestDevis(item.title, event.currentTarget)}>
                       Demander ce diagnostic <span aria-hidden="true">→</span>
                     </button>
                   </div>

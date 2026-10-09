@@ -21,10 +21,26 @@ function ReadySignal() {
   return null;
 }
 
-/** Coupe la boucle de rendu quand l'histoire 3D n'est plus à l'écran. */
+/** Coupe la boucle de rendu quand l'histoire 3D n'est plus à l'écran (ou masquée par le formulaire de demande). */
 function FrameloopController() {
   const setFrameloop = useThree((state) => state.setFrameloop);
-  useEffect(() => on("phase", (phase) => setFrameloop(phase === "story" ? "always" : "never")), [setFrameloop]);
+  useEffect(() => {
+    let inStory = true;
+    let devis = false;
+    const update = () => setFrameloop(inStory && !devis ? "always" : "never");
+    const offPhase = on("phase", (phase) => {
+      inStory = phase === "story";
+      update();
+    });
+    const offDevis = on("devis", (open) => {
+      devis = open;
+      update();
+    });
+    return () => {
+      offPhase();
+      offDevis();
+    };
+  }, [setFrameloop]);
   return null;
 }
 

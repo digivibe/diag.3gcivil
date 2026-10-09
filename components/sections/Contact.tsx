@@ -15,7 +15,7 @@ export function Contact() {
           ou administratives liées à votre projet. Devis personnalisé sous 24 à 48 h ouvrées.
         </p>
         <Magnetic>
-          <a className="contact__cta" href={`mailto:${BRAND.email}?subject=Demande%20de%20diagnostic`}>
+          <a className="contact__cta" href={`mailto:${BRAND.email}?subject=Demande%20de%20diagnostic`} data-devis="">
             <span>Demander un diagnostic</span>
           </a>
         </Magnetic>

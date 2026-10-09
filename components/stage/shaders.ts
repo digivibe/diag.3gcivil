@@ -7,7 +7,18 @@ import { uniforms as shared } from "@/components/experience/uniforms";
  * Ils réutilisent les uniforms partagés de la scène principale (palette, lumière, thème)
  * et ajoutent un fondu par dissolution (bord lumineux) pour passer d'un spécimen à l'autre.
  */
-export type SpecimenVariant = "plain" | "steel" | "pier" | "masonry" | "slab" | "coreFace" | "beam";
+export type SpecimenVariant =
+  | "plain"
+  | "steel"
+  | "pier"
+  | "masonry"
+  | "slab"
+  | "coreFace"
+  | "beam"
+  | "stone"
+  | "window"
+  | "floor"
+  | "board";
 
 const vertexShader = /* glsl */ `
 ${common}
@@ -19,9 +30,15 @@ varying vec3 vNormalW;
 varying vec3 vLocal;
 varying float vDepth;
 varying float vStress;
+#ifdef VARIANT_WINDOW
+varying vec2 vUv;
+#endif
 
 void main() {
   vec3 p = position;
+#ifdef VARIANT_WINDOW
+  vUv = uv;
+#endif
   vec3 n = normal;
   vStress = 0.0;
 #ifdef VARIANT_BEAM
@@ -60,11 +77,16 @@ uniform vec2 uHoleCenter;
 uniform float uHoleRadius;
 uniform float uStressMix;
 uniform float uLoad;
+uniform float uRustic;
+uniform float uLights;
 varying vec3 vWorld;
 varying vec3 vNormalW;
 varying vec3 vLocal;
 varying float vDepth;
 varying float vStress;
+#ifdef VARIANT_WINDOW
+varying vec2 vUv;
+#endif
 
 void main() {
   float dissolveNoise = vnoise(vWorld * 3.1 + 7.0);
@@ -95,11 +117,62 @@ void main() {
   float tint = hash13(vec3(floor(b), 3.0));
   vec3 brick = albedo * (0.8 + 0.32 * tint) * (0.9 + 0.2 * grain);
   albedo = mix(brick, mix(albedo, vec3(0.72), 0.55), joint);
+#elif defined(VARIANT_STONE)
+  // Pierre de taille : assises et joints en coordonnées monde ; refends profonds au rez-de-chaussée.
+  vec2 q = abs(n.z) > 0.5 ? vWorld.xy : (abs(n.x) > 0.5 ? vWorld.zy : vWorld.xz);
+  float course = uRustic > 0.5 ? 0.55 : 0.42;
+  vec2 s = vec2(q.x / 1.1, q.y / course);
+  s.x += mod(floor(s.y), 2.0) * 0.5;
+  vec2 f = fract(s);
+  float bed = min(f.y, 1.0 - f.y) * course;
+  float head = min(f.x, 1.0 - f.x) * 1.1;
+  float width = uRustic > 0.5 ? 0.035 : 0.008;
+  float joint = (1.0 - smoothstep(width * 0.5, width, bed)) * step(abs(n.y), 0.5);
+  if (uRustic < 0.5) joint = max(joint, (1.0 - smoothstep(0.004, 0.008, head)) * step(abs(n.y), 0.5));
+  albedo *= (0.93 + 0.1 * hash13(vec3(floor(s), 5.0))) * (0.92 + 0.12 * grain);
 #else
   albedo *= 0.88 + 0.22 * grain;
 #endif
 
   vec3 col = albedo * light;
+
+#ifdef VARIANT_STONE
+  col *= 1.0 - joint * (uRustic > 0.5 ? 0.6 : 0.4);
+  // La nuit, la façade est éclairée par en dessous (réverbères, vitrines).
+  col += albedo * vec3(1.0, 0.72, 0.45) * (1.0 - smoothstep(0.0, 10.0, vWorld.y)) * (1.0 - uTheme) * 0.22;
+#endif
+
+#ifdef VARIANT_WINDOW
+  // Vitre : reflet du ciel (fresnel) ; les fenêtres s'allument une à une (identifiant dans uv.x).
+  float fres = pow(1.0 - max(dot(n, v), 0.0), 2.0);
+  vec3 sky = mix(uSky * 1.6, vec3(0.78, 0.84, 0.92), uTheme);
+  vec3 glass = mix(albedo * 0.55, sky, 0.25 + 0.6 * fres);
+  float lit = smoothstep(vUv.x - 0.03, vUv.x + 0.03, uLights);
+  vec3 warm = vec3(1.0, 0.74, 0.46) * (0.7 + 0.4 * vUv.y) * (0.85 + 0.3 * hash13(vec3(floor(vUv.x * 97.0))));
+  col = mix(glass, warm * (uTheme > 0.5 ? 1.05 : 1.8), lit);
+#endif
+
+#ifdef VARIANT_FLOOR
+  // Sol du hall : carreaux posés en diagonale, en damier, joints fins.
+  vec2 d = vec2(vWorld.x + vWorld.z, vWorld.x - vWorld.z) * (0.7071 / 0.42);
+  vec2 tile = fract(d);
+  float dark = mod(floor(d.x) + floor(d.y), 2.0);
+  float seam = 1.0 - smoothstep(0.0, 0.035, min(min(tile.x, 1.0 - tile.x), min(tile.y, 1.0 - tile.y)));
+  col *= mix(1.0, uTheme > 0.5 ? 0.5 : 0.3, dark) * (1.0 - seam * 0.35);
+#endif
+
+#ifdef VARIANT_BOARD
+  // Tableau du hall, façon plan : trame fine, grands carreaux, balayage lent.
+  vec2 b = vWorld.xy;
+  vec2 gf = abs(fract(b * 4.0 - 0.5) - 0.5) / fwidth(b * 4.0);
+  vec2 gm = abs(fract(b - 0.5) - 0.5) / fwidth(b);
+  float fine = 1.0 - min(min(gf.x, gf.y), 1.0);
+  float major = 1.0 - min(min(gm.x, gm.y), 1.0);
+  col = albedo * (0.75 + 0.25 * hemi);
+  col = glow(col, uScanColor, fine * 0.07 + major * 0.22);
+  float sweep = 0.4 + fract(uTime * 0.06) * 3.8;
+  col = glow(col, uScanColor, (1.0 - smoothstep(0.0, 0.06, abs(b.y - sweep))) * 0.6);
+#endif
 
 #ifdef VARIANT_STEEL
   float spec = pow(max(dot(reflect(-uKeyDir, n), v), 0.0), 28.0);

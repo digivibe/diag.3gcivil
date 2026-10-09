@@ -51,6 +51,8 @@ type Events = {
   chapter: number;
   phase: "story" | "content";
   theme: Theme;
+  /** Formulaire de demande ouvert (plein écran) : les autres scènes 3D se mettent en pause. */
+  devis: boolean;
 };
 type AnyListener = (payload: unknown) => void;
 

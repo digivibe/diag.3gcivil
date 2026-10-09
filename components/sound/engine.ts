@@ -25,7 +25,12 @@ export type SoundName =
   | "close"
   | "lens"
   | "on"
-  | "off";
+  | "off"
+  | "enter"
+  | "door"
+  | "exit"
+  | "success"
+  | "error";
 
 export type SoundOptions = {
   /** Rang (chapitre, prestation, étape…) : choisit la note dans la gamme. */
@@ -55,6 +60,7 @@ const MIN_GAP: Partial<Record<SoundName, number>> = {
   flip: 0.08,
   ping: 0.1,
   lens: 0.25,
+  error: 0.3,
 };
 
 type Graph = { context: BaseAudioContext; dry: GainNode; wet: GainNode; noise: AudioBuffer };
@@ -260,6 +266,27 @@ export function synth(g: Graph, name: SoundName, t: number, { index = 0, velocit
       break;
     case "off":
       [4, 0].forEach((step, k) => bell(g, t, note(step), 0.05, 0.4, pan, 0.3, k * 0.08));
+      break;
+    case "enter": // ouverture du formulaire : souffle qui monte avec le cercle, note grave posée dessous
+      hiss(g, t, { freq: 320, to: 2600, q: 1.4, gain: 0.05, attack: 0.45, decay: 0.55, send: 0.35, pan });
+      bell(g, t, note(0) / 2, 0.045, 1.4, pan, 0.5, 0.3);
+      break;
+    case "door": // porte cochère : déclic du pêne, puis le battant lourd qui s'ouvre sur le hall
+      hiss(g, t, { type: "highpass", freq: 3800, gain: 0.05, attack: 0.001, decay: 0.02, send: 0.1, pan });
+      tone(g, t, { freq: 920, gain: 0.03, attack: 0.001, decay: 0.03, send: 0.15, pan });
+      tone(g, t, { freq: 72, to: 50, gain: 0.09, attack: 0.04, decay: 0.45, send: 0.2, pan, at: 0.08 });
+      hiss(g, t + 0.1, { type: "lowpass", freq: 520, to: 260, q: 0.7, gain: 0.07, attack: 0.25, decay: 1.1, send: 0.6, pan });
+      break;
+    case "exit": // fermeture : le souffle redescend
+      hiss(g, t, { freq: 2600, to: 300, q: 1.4, gain: 0.08, attack: 0.12, decay: 0.65, send: 0.3, pan });
+      break;
+    case "success": // demande envoyée : arpège majeur montant et scintillement
+      [0, 2, 4, 7, 9].forEach((step, k) => bell(g, t, note(step + 3), 0.06, 0.9, pan, 0.5, k * 0.075));
+      hiss(g, t + 0.3, { type: "highpass", freq: 7000, gain: 0.012, attack: 0.3, decay: 1.2, send: 0.6, pan });
+      break;
+    case "error": // champ à compléter : deux notes douces descendantes
+      tone(g, t, { freq: 330, type: "triangle", gain: 0.05, decay: 0.12, send: 0.15, pan });
+      tone(g, t, { freq: 247, type: "triangle", gain: 0.05, decay: 0.2, send: 0.15, pan, at: 0.11 });
       break;
   }
 }

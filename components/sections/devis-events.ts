@@ -1,11 +1,13 @@
-import { scrollToTarget } from "@/components/experience/story";
+/** Évènement qui ouvre le formulaire de demande (components/devis/Devis.tsx), mission présélectionnée en option. */
+export const DEVIS_OPEN_EVENT = "devis:open";
 
-/** Évènement DOM écouté par le formulaire de demande pour présélectionner un type de mission. */
-export const DEVIS_PREFILL_EVENT = "devis:prefill";
+export type DevisOpen = {
+  /** Type de mission présélectionné (valeur de MISSION_TYPES). */
+  type?: string;
+  /** Élément d'origine : la transition part de lui, et le focus y revient à la fermeture. */
+  from?: HTMLElement | null;
+};
 
-export type DevisPrefill = { type: string };
-
-export function requestDevis(type: string) {
-  window.dispatchEvent(new CustomEvent<DevisPrefill>(DEVIS_PREFILL_EVENT, { detail: { type } }));
-  scrollToTarget("#contact");
+export function requestDevis(type?: string, from?: HTMLElement | null) {
+  window.dispatchEvent(new CustomEvent<DevisOpen>(DEVIS_OPEN_EVENT, { detail: { type, from } }));
 }

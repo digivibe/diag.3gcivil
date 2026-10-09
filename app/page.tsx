@@ -1,3 +1,4 @@
+import { Devis } from "@/components/devis/Devis";
 import { Experience } from "@/components/experience/Experience";
 import { Contact, Footer } from "@/components/sections/Contact";
 import { Faq } from "@/components/sections/Faq";
@@ -64,6 +65,7 @@ export default function Home() {
         </div>
       </main>
       <Footer />
+      <Devis />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}

@@ -1,0 +1,13 @@
+{
+  "$comment": "Trajectoire de la demande de diagnostic (repère Three.js Y-up, mètres ; façade en z = 0, rue vers +Z, hall vers -Z). Chaque clé a sa frame ; les vantaux s'ouvrent entre door.from et door.to. Après modification : npm run devis:build",
+  "fps": 24,
+  "fov": 40,
+  "keys": [
+    { "name": "rue", "frame": 0, "position": [7.5, 1.7, 33.0], "target": [0, 10.0, 0] },
+    { "name": "approche", "frame": 70, "position": [2.6, 1.75, 12.5], "target": [0, 3.0, 0] },
+    { "name": "porte", "frame": 115, "position": [0, 1.75, 4.6], "target": [0, 1.95, -3] },
+    { "name": "seuil", "frame": 150, "position": [0, 1.75, -1.2], "target": [0, 1.95, -9] },
+    { "name": "hall", "frame": 190, "position": [0, 1.8, -3.4], "target": [0, 2.15, -10.75] }
+  ],
+  "door": { "from": 80, "to": 128, "angle": 100 }
+}

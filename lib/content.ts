@@ -282,6 +282,9 @@ export const MISSION_TYPES = [
   { value: "Autre / je ne sais pas encore", hint: "Nous qualifions votre besoin ensemble" },
 ] as const;
 
+/** Délai souhaité (champ "delai" du formulaire de demande). */
+export const DELAIS = ["Urgent – désordre évolutif", "Sous un mois", "Projet à venir"] as const;
+
 export const ZONES = [
   "Paris",
   "Hauts-de-Seine (92)",

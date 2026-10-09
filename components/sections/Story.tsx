@@ -39,7 +39,7 @@ export function Story() {
                 )}
                 {(i === 0 || i === last) && (
                   <div className="chapter__actions" data-reveal="stagger">
-                    <a className="button button--primary" href="#contact">
+                    <a className="button button--primary" href="#contact" data-devis="">
                       Demander un diagnostic
                     </a>
                     {i === 0 ? (
